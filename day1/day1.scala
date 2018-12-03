@@ -30,20 +30,19 @@ def findFirstRepeatedFrequency(currentFreq: Int,
       findFirstRepeatedFrequency(currentFreq, 
         frequencyList, freqsSeen)
     case nextFreq :: tail =>
-    // there must be a cleverer way!
-    val updatedFreq = currentFreq + nextFreq
+      val updatedFreq = currentFreq + nextFreq
 
-    if (freqsSeen.contains(updatedFreq)) {
-      updatedFreq
-    } else {
-      findFirstRepeatedFrequency(updatedFreq, tail, 
-        updatedFreq :: freqsSeen)
-    }
+      // ? do it with a hash
+      if (freqsSeen.contains(updatedFreq)) {
+        updatedFreq
+      } else {
+        findFirstRepeatedFrequency(updatedFreq, tail, 
+          updatedFreq :: freqsSeen)
+      }
   }
 }
 
-val frequencyList: List[Int] = Source
-  .fromFile(s"./input")
+val frequencyList: List[Int] = Source.fromFile("./input")
   .getLines
   .toList
   .map { _.toInt }
