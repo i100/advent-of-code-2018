@@ -16,7 +16,7 @@ def rudimentaryChecksum(strs: List[String]): Int = {
     _.toList
     .groupBy(identity) // count each letter
     .map(_._2.length)
-    .filter({ i => i == 2 || i == 3 })
+    .filter { i => i == 2 || i == 3 }
     .toList
     .distinct
   } .groupBy(identity) // group by counts
@@ -25,17 +25,10 @@ def rudimentaryChecksum(strs: List[String]): Int = {
   counts.getOrElse(2, 0)* counts.getOrElse(3, 0)
 }
 
-def stringsWithOneCharDifference(strs: List[String]): 
-    (String, String) = {
-  def countDiff(l1: List[Char], l2: List[Char], 
-      diffCount: Int = 0): Int = {
-
-    // println(s"Scanning $l1 vs $l2") 
-
+def stringsWithOneCharDifference(strs: List[String]): (String, String) = {
+  def countDiff(l1: List[Char], l2: List[Char], diffCount: Int = 0): Int = {
     l1 match {
-      case Nil => 
-        println(s"Reached end with diffcount ${diffCount}")
-        diffCount
+      case Nil => diffCount
       case head :: tail => 
         if (head == l2.head) {
           countDiff(tail, l2.tail, diffCount)
@@ -66,7 +59,6 @@ def stringsWithOneCharDifference(strs: List[String]):
   }
 }
 
-println(s"Box IDs: $boxIDs")
 
 if (CALC_CHECKSUM) {
   println(s"Checksum: ${rudimentaryChecksum(boxIDs)}")

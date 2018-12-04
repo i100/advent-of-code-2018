@@ -1,6 +1,5 @@
-#!/usr/bin/env scala
- 
 import scala.io.Source
+
 
 val SUM_ALL_FREQUENCIES = false 
 val TEST_FOR_REPETITION = true

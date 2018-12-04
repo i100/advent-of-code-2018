@@ -2,6 +2,7 @@ import scala.io.Source
 import scala.util.{ Try, Success, Failure } 
 import scala.collection.mutable.ListBuffer
 
+
 case class Claim(
   id: Int, 
   leftOffset: Int, 
