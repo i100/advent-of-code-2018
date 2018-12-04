@@ -26,13 +26,6 @@ def getClaims(): Seq[Claim] = {
 }
 
 
-// this is a bit crap -- mutate eeeet!!
-// represents a square inch on the grid
-class Point(x: Int, y: Int) {
-  var touchedBy: ListBuffer[Int] = ListBuffer()
-  def touch(by: Int) = { touchedBy += by }
-}
-
 object Grid {
   // I'm not sure how big the grid is but, looking at the data, 1024 x 1024 seems
   // like it should cover it... we really should let the grid expand as we see 
@@ -41,6 +34,12 @@ object Grid {
   val height = 1024
   val widthRange = (0 to width)
   val heightRange = (0 to height)
+
+  // represents a square inch on the grid
+  class Point(x: Int, y: Int) {
+    var touchedBy: ListBuffer[Int] = ListBuffer()
+    def touch(by: Int) = { touchedBy += by }
+  }
 
   val rawPoints: Array[Array[Point]] = {
     widthRange.toList.map { x =>
@@ -67,11 +66,8 @@ object Grid {
   def getDoubleTouchedPoints(): List[Point] = {
     getAllPoints.filter(_.touchedBy.length >= 2)
   }
-  
-  def showTouches() = {
-    for (p <- getAllPoints) { println(p.touchedBy) }
-  }
 }
+
 
 def updateGrid(claims: Seq[Claim]) = {
   def updateClaimedPoints(claim: Claim) = {
@@ -103,6 +99,7 @@ def findSantasGoodJersey(): Set[Int] = {
     .flatten
     .toSet
   
+  // &~ is the set complement operator
   onceTouchedClaims &~ doubleTouchedClaims
 }
 
