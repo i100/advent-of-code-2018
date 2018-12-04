@@ -1,9 +1,9 @@
 import scala.io.Source
 import scala.util.{ Try, Success, Failure } 
-
+import scala.collection.mutable.ListBuffer
 
 case class Claim(
-  number: Int, 
+  id: Int, 
   leftOffset: Int, 
   topOffset: Int, 
   width: Int, 
@@ -19,8 +19,8 @@ def getClaims(): Seq[Claim] = {
   val pattern = "#([0-9]+) @ ([0-9]+),([0-9]+): ([0-9]+)x([0-9]+)".r
   
   raw.map { s =>
-    val pattern(number, leftOffset, topOffset, width, height) = s
-    Claim(number.toInt, leftOffset.toInt, topOffset.toInt, width.toInt, 
+    val pattern(id, leftOffset, topOffset, width, height) = s
+    Claim(id.toInt, leftOffset.toInt, topOffset.toInt, width.toInt, 
           height.toInt) 
   }
 }
@@ -29,8 +29,8 @@ def getClaims(): Seq[Claim] = {
 // this is a bit crap -- mutate eeeet!!
 // represents a square inch on the grid
 class Point(x: Int, y: Int) {
-  var touches: Int = 0
-  def touch() = { touches = touches + 1}
+  var touchedBy: ListBuffer[Int] = ListBuffer()
+  def touch(by: Int) = { touchedBy += by }
 }
 
 object Grid {
@@ -60,12 +60,16 @@ object Grid {
     }.flatten
   }     
 
-  def countTouched(minTouches: Int = 2): Int = {
-    val touchesPoints: List[Int] = getAllPoints.map { p =>
-      if (p.touches >= minTouches) 1 else 0
-    }
+  def getOnceTouchedPoints(): List[Point] = {
+    getAllPoints.filter(_.touchedBy.length == 1)
+  }
 
-    touchesPoints.sum
+  def getDoubleTouchedPoints(): List[Point] = {
+    getAllPoints.filter(_.touchedBy.length >= 2)
+  }
+  
+  def showTouches() = {
+    for (p <- getAllPoints) { println(p.touchedBy) }
   }
 }
 
@@ -77,10 +81,10 @@ def updateGrid(claims: Seq[Claim]) = {
       Grid.height - claim.topOffset - claim.height + 1 
       to Grid.height - claim.topOffset
     ).toList
-    // println(s"Updating grid with claim# ${claim.number}")    // println(s"Updating grid with claim# ${claim.number}")    // println(s"Updating grid with claim# ${claim.number}")    (claim.leftOffset to (claim.leftOffset + claim.width)).toList.map { x =>
+
     width.map { x =>  
       height.map { y =>
-        Grid.getPoint(x, y).touch 
+        Grid.getPoint(x, y).touch(claim.id)
       }
     }
   } 
@@ -88,5 +92,21 @@ def updateGrid(claims: Seq[Claim]) = {
   claims.foreach(updateClaimedPoints(_))
 }
 
+def findSantasGoodJersey(): Set[Int] = {
+  val onceTouchedClaims: Set[Int] = Grid.getOnceTouchedPoints
+    .map(_.touchedBy)
+    .flatten
+    .toSet
+
+  val doubleTouchedClaims: Set[Int] = Grid.getDoubleTouchedPoints
+    .map(_.touchedBy)
+    .flatten
+    .toSet
+  
+  onceTouchedClaims &~ doubleTouchedClaims
+}
+
 updateGrid(getClaims())
-println(s"Touched points: ${Grid.countTouched(2)}")
+
+println(s"Double touched points: ${Grid.getDoubleTouchedPoints.length}")
+println(s"Santa's good jersey is #: ${findSantasGoodJersey}")
