@@ -9,16 +9,16 @@ case class LogMessage(
 )
 
 def loadLogData(): List[LogMessage] = {
-    val pattern = raw"\[(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2})\] (.+)".r
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+  val pattern = raw"\[(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2})\] (.+)".r
+  val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
-    Source.fromFile("./input")
-      .getLines
-      .toList
-      .map { line => 
-        val pattern(timestamp, message) = line 
-        LogMessage(LocalDateTime.parse(timestamp, formatter), message)
-      }
+  Source.fromFile("./input")
+    .getLines
+    .toList
+    .map { line => 
+      val pattern(timestamp, message) = line 
+      LogMessage(LocalDateTime.parse(timestamp, formatter), message)
+    }
 }
 
 def sortLogData(logData: List[LogMessage]): List[LogMessage] = {
@@ -139,7 +139,20 @@ def findSnooziestMinute(guardID: Int, sleepingGuards: List[SleepingGuard]) = {
     .flatMap { 
       guard => (guard.asleepAt.getMinute to guard.wakesAt.getMinute - 1).toList
     }
-    sleepingMinutes.groupBy(identity).mapValues(_.size).maxBy(_._2)
+  sleepingMinutes.groupBy(identity).mapValues(_.size).maxBy(_._2)
+}
+
+// part 2
+def findSnooziestGuardMinute(sleepingGuards: List[SleepingGuard]) = {
+  val sleepingGuardMinutes = sleepingGuards 
+    .flatMap {
+      guard => 
+        (guard.asleepAt.getMinute to guard.wakesAt.getMinute - 1)
+          .toList.map { m =>
+            (guard.guardID, m)
+        }
+    }
+  sleepingGuardMinutes.groupBy(identity).mapValues(_.size).maxBy(_._2)._1
 }
 
 
@@ -148,13 +161,18 @@ val sleepingGuards = parseSleepingGuards(stateTransitions)
 val timeAsleep = sumGuardsAsleep(sleepingGuards)
 val snooziestGuard = findSnooziestGuard(timeAsleep)
 val snooziestMinute = findSnooziestMinute(snooziestGuard._1, sleepingGuards)
+val snooziestGuardMinute = findSnooziestGuardMinute(sleepingGuards)
 
 //println(s"Transitions: $stateTransitions")
 //println(s"Sleeping Guards: ${parseSleepingGuards(stateTransitions)}")
 //println(s"# minutes each guard was asleep: ${timeAsleep}")
 
 println("................")
-println(s"Guard most asleep: ${snooziestGuard._1}, asleep for ${snooziestGuard._2} minutes")
-println(s"Mostly asleep during minute: ${snooziestMinute._1}, seen ${snooziestMinute._2} times.")
+println(s"Guard most often asleep: ${snooziestGuard._1}, asleep for ${snooziestGuard._2} minutes in total")
+println(s"This guard was mostly asleep during minute: ${snooziestMinute._1}, seen ${snooziestMinute._2} times.")
 println("Product of guard ID and the minute that guard was most often asleep: ")
 println(snooziestGuard._1 * snooziestMinute._1)
+println("................")
+println(s"The guard/minute that was most often seen asleep: ${snooziestGuardMinute}")
+println(s"The product of these two: ")
+println(snooziestGuardMinute._1 * snooziestGuardMinute._2)
