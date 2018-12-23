@@ -67,15 +67,10 @@ class DAG(edges: List[Edge]) {
       inactivePool.size match {
         case 0 => activeOrder.reverse
         case _ =>
-          val nextActivePool = inactivePool.filter { n =>
+          val nextActiveNode = inactivePool.filter { n =>
             (n.parents.toSet & inactivePool).size == 0
-          }.toList.sortWith(_.id < _.id)
-          println(s"next active pool: $nextActivePool")
-          val nextActiveNode = nextActivePool(0)
-          println(s"next active node: $nextActiveNode")
-          val nextInactivePool = inactivePool - nextActiveNode
-          println(s"next inactive pool: $nextInactivePool")
-          findNextActiveNode(nextActiveNode :: activeOrder, nextInactivePool) 
+          }.toList.sortWith(_.id < _.id)(0)
+          findNextActiveNode(nextActiveNode :: activeOrder, inactivePool - nextActiveNode) 
       }
     }
     findNextActiveNode(List(), rawNodes)
