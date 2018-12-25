@@ -126,13 +126,8 @@ class DAG(edges: List[Edge]) {
 
 // part two
 case class Worker(val node: Node, val lifetime: Int, val createdAt: Int)
-
+case class TickState(second: Int, workers: List[Worker])
 val MAX_WORKERS = 5
-
-case class TickState(
-  second: Int, 
-  workers: List[Worker]
-)
 
 class Ticker() {
   val dag = new DAG(inputEdges)
