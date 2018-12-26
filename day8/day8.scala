@@ -8,9 +8,9 @@ object Tree {
 
   object SerialParser {
     abstract class Token() { val valueOf: Int }
-    case class ChildrenHeader(val valueOf: Int) extends Token 
-    case class MetadataHeader(val valueOf: Int) extends Token 
-    case class Metadata(val valueOf: Int) extends Token
+    case class ChildrenHeader(valueOf: Int) extends Token
+    case class MetadataHeader(valueOf: Int) extends Token
+    case class Metadata(valueOf: Int) extends Token
 
     case class OpenNode(pointer: Int, numChildren: Int, numMetadata: Int)
     
@@ -33,12 +33,12 @@ object Tree {
               openNodes, unclaimedNodes, unclaimedMetadata)
           case ChildrenHeader(d) :: t =>
             if (raw.head == 0) throw new Exception(
-                "Malformed input, MetadataHeader must be > 0")
+                "Malformed input, value of MetadataHeader must be > 0")
             nextToken(raw.tail, MetadataHeader(raw.head) :: procdTokens, 
               OpenNode(elCount - raw.length, d, raw.head) :: openNodes,
               unclaimedNodes, unclaimedMetadata)
           case MetadataHeader(d) :: t =>
-            if (openNodes(0).numChildren == 0) {
+            if (openNodes.head.numChildren == 0) {
               nextToken(raw.tail, Metadata(raw.head) :: procdTokens, openNodes, 
                 unclaimedNodes, raw.head :: unclaimedMetadata) 
             } else {
@@ -47,14 +47,14 @@ object Tree {
             }
           case Metadata(d) :: t =>
             val metadataCompleted = 
-              openNodes(0).numMetadata == unclaimedMetadata.length
+              openNodes.head.numMetadata == unclaimedMetadata.length
             val completesNode = if (metadataCompleted) true else false 
 
             if (! completesNode) {
               nextToken(raw.tail, Metadata(raw.head) :: procdTokens, openNodes,
                 unclaimedNodes, raw.head :: unclaimedMetadata)
             } else {
-              val thisNode = openNodes(0)
+              val thisNode = openNodes.head
               val completedNode = Node(
                 thisNode.pointer, 
                 unclaimedNodes.take(thisNode.numChildren).reverse, 
@@ -62,15 +62,14 @@ object Tree {
               val updatedNodeStack = completedNode :: 
                 unclaimedNodes.drop(thisNode.numChildren)
               val updatedOpenNodes = openNodes.drop(1)
-              val numChildrenOfParent = Try(updatedOpenNodes(0).numChildren)
+              val numChildrenOfParent = Try(updatedOpenNodes.head.numChildren)
                 .getOrElse(-1)
-              val parentPointer = Try(updatedOpenNodes(0).pointer)
+              val parentPointer = Try(updatedOpenNodes.head.pointer)
                 .getOrElse(-1)  
 
-              if (! raw.isEmpty) {
+              if (raw.nonEmpty) {
                 val parentsChildrenCompleted: Boolean = updatedNodeStack
-                  .filter(_.pointer > parentPointer)
-                  .length equals numChildrenOfParent
+                  .count(_.pointer > parentPointer) == numChildrenOfParent
 
                 if (parentsChildrenCompleted) {
                   nextToken(raw.tail, Metadata(raw.head) :: procdTokens,
@@ -140,7 +139,7 @@ if (DoPart2) {
         List[(Node, Int)] = { 
       nodes match {
         case Nil => procdNodes.reverse
-        case head :: tail if head.children.length == 0 => 
+        case head :: tail if head.children.isEmpty =>
           doCalc(tail, (head, head.metadata.sum) :: procdNodes)
         case head :: tail =>
           val childPointers: List[Int] = head.metadata.filter { i =>
