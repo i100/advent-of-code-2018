@@ -18,20 +18,22 @@ object Tree {
     def parse(serialTree: List[Int]) = {
       val elCount = serialTree.length
 
-      // We use two stacks, one to keep track of openNodes, i.e. nodes whose definition 
-      // hasn't been fully read from the input yet; and unclaimedNodes, which tracks nodes 
-      // that haven't yet been assigned as children. unclaimedMetadata holds all the metas
-      // which haven't yet been assigned to a completed node. 
+      // We use two stacks, one to keep track of openNodes, i.e. nodes whose
+      // definition hasn't been fully read from the input yet; and 
+      // unclaimedNodes, which tracks nodes that haven't yet been assigned as
+      // children. unclaimedMetadata holds all the metas which haven't yet been
+      // assigned to a completed node. 
       def nextToken(raw: List[Int], procdTokens: List[Token], 
-            openNodes: List[OpenNode], unclaimedNodes: List[Node], 
-            unclaimedMetadata: List[Int]): (Node, List[Token]) = {
+          openNodes: List[OpenNode], unclaimedNodes: List[Node], 
+          unclaimedMetadata: List[Int]): (Node, List[Token]) = {
         
         procdTokens match {
           case Nil => 
             nextToken(raw.tail, ChildrenHeader(raw.head) :: procdTokens, 
               openNodes, unclaimedNodes, unclaimedMetadata)
           case ChildrenHeader(d) :: t =>
-            if (raw.head == 0) throw new Exception("Malformed input, MetadataHeader must be > 0")
+            if (raw.head == 0) throw new Exception(
+                "Malformed input, MetadataHeader must be > 0")
             nextToken(raw.tail, MetadataHeader(raw.head) :: procdTokens, 
               OpenNode(elCount - raw.length, d, raw.head) :: openNodes,
               unclaimedNodes, unclaimedMetadata)
@@ -40,26 +42,30 @@ object Tree {
               nextToken(raw.tail, Metadata(raw.head) :: procdTokens, openNodes, 
                 unclaimedNodes, raw.head :: unclaimedMetadata) 
             } else {
-              nextToken(raw.tail, ChildrenHeader(raw.head) :: procdTokens, openNodes, 
-                unclaimedNodes, unclaimedMetadata)
+              nextToken(raw.tail, ChildrenHeader(raw.head) :: procdTokens, 
+                openNodes, unclaimedNodes, unclaimedMetadata)
             }
           case Metadata(d) :: t =>
-            val metadataCompleted =  openNodes(0).numMetadata == unclaimedMetadata.length
+            val metadataCompleted = 
+              openNodes(0).numMetadata == unclaimedMetadata.length
             val completesNode = if (metadataCompleted) true else false 
 
             if (! completesNode) {
-              nextToken(raw.tail, Metadata(raw.head) :: procdTokens, openNodes, unclaimedNodes, 
-                raw.head :: unclaimedMetadata)
+              nextToken(raw.tail, Metadata(raw.head) :: procdTokens, openNodes,
+                unclaimedNodes, raw.head :: unclaimedMetadata)
             } else {
               val thisNode = openNodes(0)
               val completedNode = Node(
                 thisNode.pointer, 
                 unclaimedNodes.take(thisNode.numChildren).reverse, 
                 unclaimedMetadata.reverse)
-              val updatedNodeStack = completedNode :: unclaimedNodes.drop(thisNode.numChildren)
+              val updatedNodeStack = completedNode :: 
+                unclaimedNodes.drop(thisNode.numChildren)
               val updatedOpenNodes = openNodes.drop(1)
-              val numChildrenOfParent = Try(updatedOpenNodes(0).numChildren).getOrElse(-1)
-              val parentPointer = Try(updatedOpenNodes(0).pointer).getOrElse(-1)  
+              val numChildrenOfParent = Try(updatedOpenNodes(0).numChildren)
+                .getOrElse(-1)
+              val parentPointer = Try(updatedOpenNodes(0).pointer)
+                .getOrElse(-1)  
 
               if (! raw.isEmpty) {
                 val parentsChildrenCompleted: Boolean = updatedNodeStack
@@ -91,7 +97,8 @@ object Tree {
 class Tree(root: Node) {
   // returns the nodes in lexicographc order -- i.e. from leaves to root
   def traverse(): List[Node] = {
-    def doTraverse(layer: List[Node], discoveredNodes: List[Node]): List[Node] = {
+    def doTraverse(layer: List[Node], discoveredNodes: List[Node]): 
+        List[Node] = {
       val children = layer.flatMap(_.children)
       val childCount = children.length
       
@@ -129,7 +136,8 @@ if (DoPart2) {
   val sortedNodes = tree.traverse()
 
   def calcNodeValues() = {
-    def doCalc(nodes: List[Node], procdNodes: List[(Node, Int)]): List[(Node, Int)] = { 
+    def doCalc(nodes: List[Node], procdNodes: List[(Node, Int)]): 
+        List[(Node, Int)] = { 
       nodes match {
         case Nil => procdNodes.reverse
         case head :: tail if head.children.length == 0 => 
