@@ -19,7 +19,7 @@ object Tree {
       val elCount = serialTree.length
 
       // We use two stacks, one to keep track of openNodes, i.e. nodes whose definition 
-      // hasn't been fully read from the input yet; and a unclaimedNodes, which tracks nodes 
+      // hasn't been fully read from the input yet; and unclaimedNodes, which tracks nodes 
       // that haven't yet been assigned as children. unclaimedMetadata holds all the metas
       // which haven't yet been assigned to a completed node. 
       def nextToken(raw: List[Int], procdTokens: List[Token], 
