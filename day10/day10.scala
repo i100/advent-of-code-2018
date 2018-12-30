@@ -14,7 +14,6 @@ val inputPoints = Source.fromFile("./day10/input")
   }
 
 
-
 object Simulation {
   val XThreshold = 80
   val YThreshold = 20
@@ -38,13 +37,10 @@ object Simulation {
     val yRange = expandRangeToThreshold((yVals.min to yVals.max), YThreshold)
     val xRange = expandRangeToThreshold((xVals.min to xVals.max), XThreshold)
     val xMin = xRange.min
-    // println(s"Printing grid...\nxVals: $xVals\nyVals: $yVals\n y range: $yRange")
 
     def makeLine(xRemaining: List[Int],
         procdLine: List[Char]): String = {
       val curXPosition = xMin + procdLine.length
-
-      //println(s"Making line\ncur X: $curXPosition\npoints remaining: $pointsRemaining\nprocd line: $procdLine")
 
       xRemaining match {
         case l if procdLine.length == XThreshold => 
@@ -75,7 +71,7 @@ object Simulation {
   def pointsInProximity(points: List[Point]): Boolean = {
     val xVals = points.map(_.x)
     val yVals = points.map(_.y)
-    //println(s"Tick x range: ${xVals.max - xVals.min}, y range: ${yVals.max - yVals.min}")
+    
     xVals.max - xVals.min <= XThreshold &&
       yVals.max - yVals.min <= YThreshold
   }
@@ -94,7 +90,8 @@ object Simulation {
   }
 
   def run(initialPoints: List[Point]) = {
-    var pointsHaveConverged = false 
+    var pointsHaveConverged = false
+
     def doRun(lastTick: List[Point], tickCount: Int): (List[Point], Int) = {
       if (tickCount % 1000 == 0) println(s"At tick #$tickCount")
       
@@ -115,5 +112,5 @@ object Simulation {
   }
 }
 
-println(s"Input points: $inputPoints")
+
 Simulation.run(inputPoints)
