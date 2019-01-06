@@ -19,6 +19,12 @@ val evolutionRules: Map[String, Char] = input.drop(2)
   .map(_.split(" => "))
   .map(a => (a(0), a(1)(0))).toMap
 
+def score(state: List[Pot]) = {
+  state.foldLeft(0) { (acc, e) =>
+    if (e.isFull) acc + e.id else acc
+  }
+}
+
 def padState(state: List[Pot]): List[Pot] = {
   // pad the input on both ends so that there are at least 5 .'s
   def countEmptyPotsOnLeft(remaining: List[Pot], seen: Int = 0): Int = {
@@ -58,7 +64,7 @@ def evolve(state: List[Pot]): List[Pot] = {
     evolutionRules(rawPattern)
   }
 
-  paddedState
+  val nextState = paddedState
     .map { p =>
       if (p.id > paddedState.head.id + 1 && p.id < paddedState.last.id - 1) {
         matchPattern(p.id)
@@ -68,9 +74,15 @@ def evolve(state: List[Pot]): List[Pot] = {
     }
     .zip(paddedState.map(_.id))
     .map { e => Pot(e._2, if (e._1 == '#') true else false) }
+
+  val stateScore = score(nextState)
+
+  println(s"State score for this evolution: $stateScore")
+
+  nextState
 }
 
-def simulate(initialState: List[Pot], evolutions: Long): List[Pot] = {
+def simulate(initialState: List[Pot], evolutions: Int): List[Pot] = {
   if (evolutions % 1000 == 0) println(s"Evolutions remaining: $evolutions")
   if (evolutions <= 0) {
     initialState
@@ -79,13 +91,8 @@ def simulate(initialState: List[Pot], evolutions: Long): List[Pot] = {
   }
 }
 
-val evolutions = 50000000000L // L: long
+
+val evolutions = 10000
 
 val results = simulate(initialState, evolutions)
 println(s"Simulation results: $results")
-
-val sumOfFullPots = results.foldLeft(0) { (acc, e) =>
-  if (e.isFull) acc + e.id else acc
-}
-
-println(s"Sum  of ids of full pots is: $sumOfFullPots")
